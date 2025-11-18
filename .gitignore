@@ -32,6 +32,9 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Credentials file (keep it private)
+CREDENTIALS.md
+
 # Vercel
 .vercel
 
