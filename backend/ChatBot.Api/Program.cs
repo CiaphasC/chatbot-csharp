@@ -8,6 +8,9 @@ using ChatBot.Api.Infrastructure.Supabase;
 using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 
+// Cargar variables de entorno desde .env
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // CORS para permitir requests desde Vercel y localhost
