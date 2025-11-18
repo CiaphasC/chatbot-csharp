@@ -7,6 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Supabase" Version="2.2.2" />
+    <PackageReference Include="supabase-csharp" Version="0.18.0" />
   </ItemGroup>
 </Project>
