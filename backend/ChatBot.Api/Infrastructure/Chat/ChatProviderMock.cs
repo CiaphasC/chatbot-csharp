@@ -1,4 +1,6 @@
+using ChatBot.Api.Domain.Models;
 using ChatBot.Api.Infrastructure.Options;
+using Microsoft.Extensions.Options;
 
 namespace ChatBot.Api.Infrastructure.Chat;
 
@@ -62,8 +64,5 @@ public class ChatProviderMock : IChatProvider
         return "No encontré coincidencia. Pregunta por citas, servicios, pagos o ubicación y te respondo.";
     }
 
-    private record BotReply(string Intent, string Reply, IEnumerable<string> Keywords)
-    {
-        public List<string> Keywords { get; } = Keywords.ToList();
-    }
+    private record BotReply(string Intent, string Reply, string[] Keywords);
 }

@@ -30,8 +30,7 @@ public class SupabaseClientProvider
         var options = new SupabaseOptions
         {
             AutoRefreshToken = false,
-            AutoConnectRealtime = false,
-            PersistSession = false,
+            AutoConnectRealtime = false
         };
 
         var client = new Client(url, key, options);

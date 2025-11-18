@@ -30,15 +30,21 @@ public class ProfileService : IProfileService
     private async Task<Result<DbProfile>> UpdateStatus(Guid profileId, string status)
     {
         var client = await _clientProvider.GetClientAsync();
-        var updatePayload = new Dictionary<string, object> { { "status", status } };
-
-        var response = await client.From<DbProfile>()
+        
+        var profile = await client.From<DbProfile>()
             .Where(p => p.Id == profileId)
-            .Update(updatePayload);
+            .Single();
+            
+        if (profile is null)
+            return Result<DbProfile>.Failure("Perfil no encontrado");
+            
+        profile.Status = status;
+        var response = await client.From<DbProfile>()
+            .Update(profile);
 
         var updated = response.Models.FirstOrDefault();
         return updated is null
-            ? Result<DbProfile>.Failure("Perfil no encontrado")
+            ? Result<DbProfile>.Failure("Error al actualizar perfil")
             : Result<DbProfile>.Success(updated);
     }
 }

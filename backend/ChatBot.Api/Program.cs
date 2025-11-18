@@ -1,9 +1,11 @@
 using ChatBot.Api.Endpoints;
 using ChatBot.Api.Infrastructure;
 using ChatBot.Api.Infrastructure.Appointments;
+using ChatBot.Api.Infrastructure.Auth;
+using ChatBot.Api.Infrastructure.Chat;
 using ChatBot.Api.Infrastructure.Options;
 using ChatBot.Api.Infrastructure.Supabase;
-using ChatBot.Api.Infrastructure.Auth;
+using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);

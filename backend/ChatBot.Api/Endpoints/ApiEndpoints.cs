@@ -4,7 +4,9 @@ using ChatBot.Api.Infrastructure;
 using ChatBot.Api.Infrastructure.Appointments;
 using ChatBot.Api.Infrastructure.Chat;
 using ChatBot.Api.Infrastructure.Options;
+using ChatBot.Api.Infrastructure.Supabase;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
 
 namespace ChatBot.Api.Endpoints;
 
@@ -59,10 +61,16 @@ public static class ApiEndpoints
             if (HasSupabase())
             {
                 var client = await supa.GetClientAsync();
-                var res = await client.From<Infrastructure.Supabase.Models.DbService>()
+                var existing = await client.From<Infrastructure.Supabase.Models.DbService>()
                     .Where(s => s.Id == id)
-                    .Update(new { name = req.Name, duration_minutes = req.DurationMinutes, description = req.Description });
-                if (!res.Models.Any()) return Results.NotFound();
+                    .Single();
+                if (existing == null) return Results.NotFound();
+                
+                existing.Name = req.Name;
+                existing.DurationMinutes = req.DurationMinutes;
+                existing.Description = req.Description;
+                
+                var res = await client.From<Infrastructure.Supabase.Models.DbService>().Update(existing);
                 return Results.Ok(res.Models.First());
             }
             else
@@ -118,8 +126,8 @@ public static class ApiEndpoints
                 var clientIds = appts.Select(a => a.ClientId).Distinct().ToList();
                 var serviceIds = appts.Select(a => a.ServiceId).Distinct().ToList();
 
-                var profiles = (await client.From<Infrastructure.Supabase.Models.DbProfile>().In("id", clientIds)).Models;
-                var services = (await client.From<Infrastructure.Supabase.Models.DbService>().In("id", serviceIds)).Models;
+                var profiles = (await client.From<Infrastructure.Supabase.Models.DbProfile>().Filter("id", Supabase.Postgrest.Constants.Operator.In, clientIds).Get()).Models;
+                var services = (await client.From<Infrastructure.Supabase.Models.DbService>().Filter("id", Supabase.Postgrest.Constants.Operator.In, serviceIds).Get()).Models;
 
                 var result = appts.Select(a => new
                 {

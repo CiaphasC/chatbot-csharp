@@ -1,4 +1,5 @@
 using ChatBot.Api.Domain.Models;
+using ChatBot.Api.Infrastructure.Chat;
 using ChatBot.Api.Infrastructure.Options;
 using ChatBot.Api.Infrastructure.Supabase.Models;
 using Microsoft.Extensions.Options;

@@ -1,7 +1,9 @@
 using ChatBot.Api.Application.Results;
 using ChatBot.Api.Domain.Models;
+using ChatBot.Api.Infrastructure.Appointments;
 using ChatBot.Api.Infrastructure.Supabase.Models;
 using Supabase;
+using PostgrestOperator = Supabase.Postgrest.Constants.Operator;
 
 namespace ChatBot.Api.Infrastructure.Supabase;
 
@@ -22,8 +24,7 @@ public class SupabaseAppointmentService : IAppointmentService
     {
         var client = await _clientProvider.GetClientAsync();
 
-        var service = (await client.From<DbService>().Filter("id", Supabase.Postgrest.Constants.Operator.Equals, req.ServiceId).Single())
-            .Model;
+        var service = await client.From<DbService>().Filter("id", PostgrestOperator.Equals, req.ServiceId).Single();
         if (service == null)
             return Result<Appointment>.Failure("Servicio no encontrado.");
 
@@ -66,8 +67,7 @@ public class SupabaseAppointmentService : IAppointmentService
     {
         var client = await _clientProvider.GetClientAsync();
 
-        var service = (await client.From<DbService>().Filter("id", Supabase.Postgrest.Constants.Operator.Equals, req.ServiceId).Single())
-            .Model;
+        var service = await client.From<DbService>().Filter("id", PostgrestOperator.Equals, req.ServiceId).Single();
         if (service == null)
             return Result<bool>.Failure("Servicio no encontrado.");
 
@@ -85,8 +85,7 @@ public class SupabaseAppointmentService : IAppointmentService
     public async Task<Result<bool>> CancelAsync(Guid appointmentId, Guid requesterId, bool isAdmin)
     {
         var client = await _clientProvider.GetClientAsync();
-        var row = await client.From<DbAppointment>().Where(a => a.Id == appointmentId).Single();
-        var appt = row.Model;
+        var appt = await client.From<DbAppointment>().Where(a => a.Id == appointmentId).Single();
         if (appt is null) return Result<bool>.Failure("Cita no encontrada");
         if (!isAdmin && appt.ClientId != requesterId)
             return Result<bool>.Failure("No autorizado");

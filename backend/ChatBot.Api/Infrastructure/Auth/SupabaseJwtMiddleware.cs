@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace ChatBot.Api.Infrastructure.Auth;
@@ -78,7 +79,7 @@ public class SupabaseJwtMiddleware
         if (res?.Keys is null || res.Keys.Count == 0)
             throw new InvalidOperationException("No se pudieron obtener las llaves JWKS de Supabase.");
 
-        var keys = res.Keys.Select(k => new JsonWebKey(k)).ToList<SecurityKey>();
+        var keys = res.Keys.Select(k => JsonWebKey.Create(JsonSerializer.Serialize(k))).ToList<SecurityKey>();
         _cache.Set("supabase_jwks", keys, TimeSpan.FromHours(1));
         return keys;
     }
