@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Send, AlertCircle, Loader2 } from 'lucide-react'
-import { ChatMessage, sendChatMessageMock } from '@/lib/chatbot'
 import { toast } from '@/hooks/use-toast'
+import { api } from '@/lib/api'
 
 function createMessage(sender: ChatMessage['sender'], content: string): ChatMessage {
   return {
@@ -19,10 +19,7 @@ function createMessage(sender: ChatMessage['sender'], content: string): ChatMess
 
 export function ChatbotPlaceholder() {
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    createMessage(
-      'system',
-      'Hola, soy tu asistente. Aún estoy en desarrollo, pero ya puedo simular respuestas con datos mock.',
-    ),
+    createMessage('system', 'Hola, soy tu asistente. Puedo responder con la base de conocimiento interna.'),
   ])
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -48,8 +45,22 @@ export function ChatbotPlaceholder() {
     setIsSending(true)
 
     try {
-      const reply = await sendChatMessageMock(text)
-      setMessages((prev) => [...prev, reply])
+      const reply = await api.chat(text)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: reply.userMessage.id,
+          sender: reply.userMessage.sender as any,
+          content: reply.userMessage.content,
+          createdAt: new Date(reply.userMessage.createdAt).getTime(),
+        },
+        {
+          id: reply.assistantMessage.id,
+          sender: reply.assistantMessage.sender as any,
+          content: reply.assistantMessage.content,
+          createdAt: new Date(reply.assistantMessage.createdAt).getTime(),
+        },
+      ])
     } catch (error) {
       console.error('chat-error', error)
       toast({
@@ -65,7 +76,6 @@ export function ChatbotPlaceholder() {
     () => [
       '¿Qué citas tengo hoy?',
       'Lista de servicios disponibles',
-      'Empleados activos',
       'Clientes pendientes de aprobación',
     ],
     [],
@@ -160,9 +170,11 @@ export function ChatbotPlaceholder() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Las respuestas son mock. Reemplaza <code>sendChatMessageMock</code> por tu API cuando conectes Supabase/C#.
+          Las respuestas provienen de la base de conocimiento en Supabase.
         </p>
       </div>
     </motion.div>
   )
 }
+
+

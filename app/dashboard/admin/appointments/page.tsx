@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -15,18 +15,24 @@ import {
 import { AppointmentDetails } from '@/components/appointments/appointment-details';
 import { Search, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { mockAdminAppointments } from '@/lib/mocks';
-
+import { api, type AppointmentDto, type ServiceDto, type ClientDto } from '@/lib/api';
 
 export default function AppointmentsPage() {
-  const [appointments, setAppointments] = useState(mockAdminAppointments);
+  const [appointments, setAppointments] = useState<AppointmentDto[]>([]);
+  const [services, setServices] = useState<ServiceDto[]>([]);
+  const [clients, setClients] = useState<ClientDto[]>([]);
   const [filterDate, setFilterDate] = useState('');
   const [filterService, setFilterService] = useState('all');
-  const [filterEmployee, setFilterEmployee] = useState('all');
   const [searchText, setSearchText] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
-  const handleStatusChange = (appointmentId: number, newStatus: string) => {
+  useEffect(() => {
+    api.listAppointments().then(setAppointments).catch(console.error);
+    api.listServices().then(setServices).catch(console.error);
+    api.listClients().then(setClients).catch(console.error);
+  }, []);
+
+  const handleStatusChange = (appointmentId: string, newStatus: string) => {
     setAppointments(
       appointments.map((apt) =>
         apt.id === appointmentId ? { ...apt, status: newStatus } : apt
@@ -35,10 +41,10 @@ export default function AppointmentsPage() {
   };
 
   const filteredAppointments = appointments.filter((apt) => {
-    if (filterDate && apt.date !== filterDate) return false;
-    if (filterService !== 'all' && apt.serviceName !== filterService) return false;
-    if (filterEmployee !== 'all' && apt.employeeName !== filterEmployee) return false;
-    if (searchText && !apt.clientName.toLowerCase().includes(searchText.toLowerCase())) return false;
+    const date = apt.start_at?.slice(0, 10);
+    if (filterDate && date !== filterDate) return false;
+    if (filterService !== 'all' && apt.service_id !== filterService) return false;
+    if (searchText && !apt.client_id?.toLowerCase().includes(searchText.toLowerCase())) return false;
     return true;
   });
 
@@ -58,6 +64,9 @@ export default function AppointmentsPage() {
       transition: { type: 'spring', stiffness: 100, damping: 15 },
     },
   };
+
+  const serviceName = (id?: string) => services.find((s) => s.id === id)?.name ?? id;
+  const clientName = (id?: string) => clients.find((c) => c.id === id)?.full_name ?? id;
 
   return (
     <DashboardLayout>
@@ -84,7 +93,7 @@ export default function AppointmentsPage() {
         >
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
           <Input
-            placeholder="Buscar por cliente..."
+            placeholder="Buscar por cliente (ID/nombre)..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className="pl-12 bg-gradient-to-r from-card/60 to-card/30 backdrop-blur-xl border-border/50 text-foreground placeholder:text-muted-foreground/50"
@@ -102,7 +111,7 @@ export default function AppointmentsPage() {
             <Filter className="w-5 h-5 text-primary" />
             <h3 className="font-semibold text-foreground">Filtros avanzados</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <motion.div className="space-y-2" whileHover={{ scale: 1.02 }}>
               <Label className="text-foreground text-sm font-medium">Fecha</Label>
               <Input
@@ -121,24 +130,9 @@ export default function AppointmentsPage() {
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border/50">
                   <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="Consulta General">Consulta General</SelectItem>
-                  <SelectItem value="Seguimiento">Seguimiento</SelectItem>
-                  <SelectItem value="Diagnóstico">Diagnóstico</SelectItem>
-                </SelectContent>
-              </Select>
-            </motion.div>
-
-            <motion.div className="space-y-2" whileHover={{ scale: 1.02 }}>
-              <Label className="text-foreground text-sm font-medium">Empleado</Label>
-              <Select value={filterEmployee} onValueChange={setFilterEmployee}>
-                <SelectTrigger className="bg-background/50 backdrop-blur-sm border-border/50 text-foreground">
-                  <SelectValue placeholder="Todos" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-border/50">
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="Dr. Juan García">Dr. Juan García</SelectItem>
-                  <SelectItem value="Dra. María López">Dra. María López</SelectItem>
-                  <SelectItem value="Dr. Carlos Martínez">Dr. Carlos Martínez</SelectItem>
+                  {services.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </motion.div>
@@ -166,7 +160,16 @@ export default function AppointmentsPage() {
                   key={apt.id}
                   className="backdrop-blur-xl bg-gradient-to-r from-card/80 via-card/40 to-card/20 border border-border/30 rounded-2xl p-6 hover:from-card/90 hover:via-card/60 hover:to-card/40 hover:border-primary/50 transition-all duration-300 text-left w-full group"
                   variants={itemVariants}
-                  onClick={() => setSelectedAppointment(apt)}
+                  onClick={() => setSelectedAppointment({
+                    id: apt.id,
+                    clientName: clientName(apt.client_id),
+                    serviceName: serviceName(apt.service_id),
+                    date: apt.start_at?.slice(0,10),
+                    time: new Date(apt.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    duration: services.find((s)=>s.id===apt.service_id)?.duration_minutes + ' min',
+                    location: 'N/A',
+                    status: apt.status as any,
+                  })}
                   whileHover={{ x: 4, boxShadow: '0 20px 40px rgba(141, 56, 156, 0.15)' }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -177,7 +180,7 @@ export default function AppointmentsPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                       >
-                        {apt.clientName}
+                        {clientName(apt.client_id)}
                       </motion.p>
                       <motion.p 
                         className="text-sm text-muted-foreground"
@@ -185,7 +188,7 @@ export default function AppointmentsPage() {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.05 }}
                       >
-                        {apt.serviceName} • {apt.employeeName}
+                        {serviceName(apt.service_id)}
                       </motion.p>
                     </div>
 
@@ -196,8 +199,8 @@ export default function AppointmentsPage() {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.1 }}
                       >
-                        <p className="font-medium text-foreground">{apt.date}</p>
-                        <p className="text-sm text-muted-foreground">{apt.time}</p>
+                        <p className="font-medium text-foreground">{apt.start_at?.slice(0,10)}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(apt.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                       </motion.div>
 
                       <motion.span
@@ -226,7 +229,7 @@ export default function AppointmentsPage() {
             <AppointmentDetails
               appointment={selectedAppointment}
               onClose={() => setSelectedAppointment(null)}
-              onStatusChange={handleStatusChange}
+              onStatusChange={(id, status) => handleStatusChange(id as any, status)}
             />
           )}
         </AnimatePresence>
@@ -234,4 +237,3 @@ export default function AppointmentsPage() {
     </DashboardLayout>
   );
 }
-

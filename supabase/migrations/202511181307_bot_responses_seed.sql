@@ -1,0 +1,26 @@
+-- Semilla de respuestas básicas para el chatbot (sin IA)
+insert into public.bot_responses (intent, reply, keywords)
+values
+  ('citas_info', 'Puedo ayudarte a ver o agendar una cita. Indica servicio, fecha y hora que prefieres.', array['cita','agendar','agenda','disponible']),
+  ('servicios_info', 'Los servicios disponibles incluyen Consulta General, Seguimiento y Diagnóstico. ¿Cuál necesitas?', array['servicio','servicios','consulta','diagnostico','diagnóstico','seguimiento']),
+  ('empleados_info', 'Puedo consultar el personal disponible. Indica especialidad o servicio que necesitas y te muestro opciones.', array['empleado','empleados','doctor','doctora','personal','especialista']),
+  ('saludo', '¡Hola! Soy tu asistente. Pregúntame por citas, servicios o personal y te ayudaré.', array['hola','buenas','saludo','hey']),
+  ('confirmacion_cita', 'Tu cita se confirma al completar la disponibilidad. Si ya la agendaste, te llegará correo. ¿Fecha y servicio?', array['confirmar','confirmación','confirmada','confirmado']),
+  ('cancelacion_cita', 'Para cancelar una cita, indica la fecha y el servicio o comunícate con el admin. Puedo enviar la solicitud.', array['cancelar','cancelación','cancela','anular']),
+  ('reagendar_cita', 'Para reagendar, dime fecha/hora actual y la nueva preferida. Verifico disponibilidad.', array['reagendar','cambiar hora','mover cita','modificar cita']),
+  ('horarios', 'Los horarios habituales son de 09:00 a 17:00. Verifico disponibilidad según servicio y empleado.', array['horario','horarios','hora','agenda horas']),
+  ('precios', 'Los precios dependen del servicio. Puedo listarlos si me indicas el servicio o los comparto todos.', array['precio','coste','costo','tarifa']),
+  ('pagos', 'Aceptamos pagos en línea y en sitio. El detalle se confirma al agendar la cita.', array['pago','pagos','pagar','factura','facturación']),
+  ('ubicacion', 'Estamos en la ubicación registrada en tu cuenta. Si necesitas detalles, puedo compartir la dirección.', array['ubicación','direccion','dirección','donde están','cómo llegar']),
+  ('soporte', 'Si necesitas ayuda humana, puedo escalar a un administrador. ¿Qué problema tienes?', array['soporte','ayuda','problema','error']),
+  ('chat_historial', 'Puedo consultar tu historial de mensajes y citas. ¿Qué fecha o tema necesitas?', array['historial','mensajes','conversación','conversacion']),
+  ('citas_hoy', '¿Quieres ver tus citas de hoy? Puedo listarlas si me confirmas tu correo.', array['citas de hoy','hoy citas','hoy tengo cita']),
+  ('estado_cuenta', 'Tu cuenta se activa al ser aprobada por un admin. Si sigues en pendiente, espera el correo de activación.', array['estado cuenta','aprobación','aprobado','pendiente']),
+  ('servicio_virtual', 'También hay consulta virtual si aplica. Dime si prefieres presencial o virtual.', array['virtual','online','remoto']),
+  ('servicio_presence', 'Podemos agendar presencial. Dime servicio y hora preferida.', array['presencial','en persona','en sitio']),
+  ('seguimiento_cita', 'Para seguimiento, dime el ID/fecha de tu cita y la actualizo.', array['seguimiento cita','follow up','continuar cita']),
+  ('contacto_admin', '¿Necesitas hablar con un admin? Puedo enviar tu solicitud de contacto.', array['admin','administrador','contactar admin']),
+  ('recordatorios', 'Podemos enviar recordatorios por correo. Indica la cita y verifico.', array['recordatorio','recordatorios','avisar']),
+  ('idioma', 'Puedo responder en español. Si necesitas otro idioma, por ahora no está disponible.', array['idioma','lenguaje']),
+  ('seguridad', 'Tus datos se almacenan en Supabase con RLS. Solo admins autorizados acceden a información completa.', array['seguridad','datos','privacidad']),
+  ('fallback', 'No encontré coincidencias en mi base. ¿Puedes dar más detalles sobre cita, servicio o empleado?', array['?']);

@@ -6,8 +6,8 @@ const _geist = Geist({ subsets: ['latin'] })
 const _geistMono = Geist_Mono({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Sistema de Gestion | Empleados y Citas',
-  description: 'Sistema profesional de gestion de empleados, clientes y citas con diseno moderno',
+  title: 'Sistema de Gestion | Clientes y Citas',
+  description: 'Sistema profesional de gestion de clientes, servicios y citas con diseno moderno',
   icons: {
     icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
   },

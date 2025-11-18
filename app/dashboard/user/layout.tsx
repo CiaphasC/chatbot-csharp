@@ -3,5 +3,5 @@ export default function UserDashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  return children;
+  return <AuthGuard requiredRole="client" requireActive>{children}</AuthGuard>
 }

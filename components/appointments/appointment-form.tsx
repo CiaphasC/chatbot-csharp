@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,13 +13,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AlertCircle, CheckCircle } from 'lucide-react';
-import { mockServices, mockTimeSlots } from '@/lib/mocks';
+import { api, type ServiceDto } from '@/lib/api';
 
 interface AppointmentFormProps {
   onSubmit?: (data: any) => void;
+  services?: ServiceDto[];
+  clientId?: string;
 }
 
-export function AppointmentForm({ onSubmit }: AppointmentFormProps) {
+export function AppointmentForm({ onSubmit, services = [], clientId }: AppointmentFormProps) {
   const [formData, setFormData] = useState({
     service: '',
     date: '',
@@ -30,11 +32,29 @@ export function AppointmentForm({ onSubmit }: AppointmentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const timeSlots = useMemo(() => {
+    const slots: string[] = []
+    for (let h = 9; h <= 17; h++) {
+      for (const m of [0, 30]) {
+        if (h === 17 && m > 0) continue
+        slots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`)
+      }
+    }
+    return slots
+  }, []);
+
+  useEffect(() => {
+    if (services.length && !formData.service) {
+      setFormData((prev) => ({ ...prev, service: services[0].id }));
+    }
+  }, [services]);
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.service) newErrors.service = 'Selecciona un servicio';
     if (!formData.date) newErrors.date = 'Selecciona una fecha';
     if (!formData.time) newErrors.time = 'Selecciona una hora';
+    if (!clientId) newErrors.client = 'No hay cliente autenticado';
     return newErrors;
   };
 
@@ -48,15 +68,20 @@ export function AppointmentForm({ onSubmit }: AppointmentFormProps) {
     }
 
     setIsLoading(true);
-    // TODO: verificar disponibilidad contra Supabase (appointments table)
-    // TODO: bloquear slots ya ocupados para ese día y servicio
-    console.log('Appointment booking:', formData);
-
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await api.createAppointment({
+        client_id: clientId!,
+        service_id: formData.service,
+        date: formData.date,
+        time: formData.time,
+      });
       setSubmitted(true);
       onSubmit?.(formData);
-    }, 1000);
+    } catch (err: any) {
+      setErrors({ submit: err.message || 'Error al agendar' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (submitted) {
@@ -74,7 +99,7 @@ export function AppointmentForm({ onSubmit }: AppointmentFormProps) {
             ¡Cita Reservada Exitosamente!
           </h3>
           <p className="text-muted-foreground text-sm">
-            Tu cita ha sido registrada. Recibirás una confirmación por correo.
+            Tu cita ha sido registrada. Recibirás una confirmación por correo si el admin la aprueba.
           </p>
         </div>
       </motion.div>
@@ -111,9 +136,9 @@ export function AppointmentForm({ onSubmit }: AppointmentFormProps) {
             <SelectValue placeholder="Selecciona un servicio" />
           </SelectTrigger>
           <SelectContent className="bg-card border-border">
-            {mockServices.map((service) => (
-              <SelectItem key={service.id} value={service.id.toString()} className="text-foreground">
-                {service.name} ({service.duration} min)
+            {services.map((service) => (
+              <SelectItem key={service.id} value={service.id} className="text-foreground">
+                {service.name} ({service.duration_minutes} min)
               </SelectItem>
             ))}
           </SelectContent>
@@ -166,7 +191,7 @@ export function AppointmentForm({ onSubmit }: AppointmentFormProps) {
             <SelectValue placeholder="Selecciona una hora" />
           </SelectTrigger>
           <SelectContent className="bg-card border-border">
-            {mockTimeSlots.map((slot) => (
+            {timeSlots.map((slot) => (
               <SelectItem key={slot} value={slot} className="text-foreground">
                 {slot}
               </SelectItem>
@@ -181,6 +206,13 @@ export function AppointmentForm({ onSubmit }: AppointmentFormProps) {
         )}
       </div>
 
+      {errors.submit && (
+        <div className="flex items-center gap-2 text-destructive text-sm">
+          <AlertCircle className="w-4 h-4" />
+          {errors.submit}
+        </div>
+      )}
+
       <Button
         type="submit"
         disabled={isLoading}
@@ -191,5 +223,3 @@ export function AppointmentForm({ onSubmit }: AppointmentFormProps) {
     </motion.form>
   );
 }
-
-

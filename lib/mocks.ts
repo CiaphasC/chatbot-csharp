@@ -10,7 +10,6 @@ export type Service = {
 export type Appointment = {
   id: number
   clientName: string
-  employeeName: string
   serviceName: string
   date: string
   time: string
@@ -67,7 +66,6 @@ export const mockAdminAppointments: Appointment[] = [
   {
     id: 1,
     clientName: 'María García',
-    employeeName: 'Dr. Juan García',
     serviceName: 'Consulta General',
     date: '2024-12-20',
     time: '10:00 AM',
@@ -79,7 +77,6 @@ export const mockAdminAppointments: Appointment[] = [
   {
     id: 2,
     clientName: 'Carlos López',
-    employeeName: 'Dra. María López',
     serviceName: 'Seguimiento',
     date: '2024-12-20',
     time: '11:30 AM',
@@ -90,7 +87,6 @@ export const mockAdminAppointments: Appointment[] = [
   {
     id: 3,
     clientName: 'Ana Martínez',
-    employeeName: 'Dr. Carlos Martínez',
     serviceName: 'Diagnóstico',
     date: '2024-12-20',
     time: '02:00 PM',
@@ -101,7 +97,6 @@ export const mockAdminAppointments: Appointment[] = [
   {
     id: 4,
     clientName: 'Pedro Sánchez',
-    employeeName: 'Dr. Juan García',
     serviceName: 'Consulta General',
     date: '2024-12-21',
     time: '09:00 AM',
@@ -117,7 +112,6 @@ export const mockUserAppointments = [
     date: '2024-12-20',
     time: '10:00 AM',
     service: 'Consulta General',
-    employee: 'Dr. Juan García',
     status: 'confirmada' as const,
   },
   {
@@ -125,7 +119,6 @@ export const mockUserAppointments = [
     date: '2024-12-27',
     time: '02:00 PM',
     service: 'Seguimiento',
-    employee: 'Dra. María López',
     status: 'pendiente' as const,
   },
   {
@@ -133,39 +126,7 @@ export const mockUserAppointments = [
     date: '2024-12-15',
     time: '11:30 AM',
     service: 'Diagnóstico',
-    employee: 'Dr. Carlos Martínez',
     status: 'cancelada' as const,
-  },
-]
-
-export const mockEmployees: UserRow[] = [
-  {
-    id: 1,
-    name: 'Dr. Juan García',
-    email: 'juan@example.com',
-    role: 'Médico',
-    status: 'activo',
-  },
-  {
-    id: 2,
-    name: 'Dra. María López',
-    email: 'maria@example.com',
-    role: 'Médica',
-    status: 'activo',
-  },
-  {
-    id: 3,
-    name: 'Dr. Carlos Martínez',
-    email: 'carlos@example.com',
-    role: 'Especialista',
-    status: 'activo',
-  },
-  {
-    id: 4,
-    name: 'Ana Rodríguez',
-    email: 'ana@example.com',
-    role: 'Recepcionista',
-    status: 'pendiente',
   },
 ]
 

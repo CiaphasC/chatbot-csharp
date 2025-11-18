@@ -1,24 +1,29 @@
-using ChatBot.Api.Domain.Models;
 using ChatBot.Api.Infrastructure.Options;
-using Microsoft.Extensions.Options;
 
 namespace ChatBot.Api.Infrastructure.Chat;
 
-public interface IChatProvider
-{
-    Task<ChatResponse> ReplyAsync(ChatRequest request);
-}
-
 /// <summary>
-/// Proveedor mock; sustituir por implementación real (OpenAI/Azure/LLM propio).
+/// Proveedor basado en respuestas locales sin IA. Fallback cuando no hay Supabase disponible.
 /// </summary>
 public class ChatProviderMock : IChatProvider
 {
-    private readonly ChatSettings _settings;
+    private readonly List<BotReply> _replies;
 
     public ChatProviderMock(IOptions<ChatSettings> settings)
     {
-        _settings = settings.Value;
+        _replies = new List<BotReply>
+        {
+            new("citas_info", "Puedo ayudarte a ver o agendar una cita. Indica servicio, fecha y hora que prefieres.", new[]{"cita","agendar","agenda","disponible"}),
+            new("servicios_info", "Servicios disponibles: Consulta General, Seguimiento y Diagnóstico. ¿Cuál necesitas?", new[]{"servicio","servicios","consulta","diagnostico","diagnóstico","seguimiento"}),
+            new("disponibilidad", "Indica servicio, fecha y hora y verifico si hay disponibilidad en la agenda.", new[]{"disponibilidad","horario","agenda","hora libre","libre"}),
+            new("cancelacion", "Cancelaciones hasta 24h antes. Indica fecha/hora y servicio para procesar.", new[]{"cancelar","cancelación","anular"}),
+            new("reagendar", "Para reagendar, dime la fecha/hora actual y la nueva preferida.", new[]{"reagendar","cambiar hora","mover cita","modificar cita"}),
+            new("pagos", "Aceptamos tarjeta, pago en línea y efectivo en sitio. ¿Cuál prefieres?", new[]{"pago","pagos","pagar","factura","facturación","facturacion","efectivo","tarjeta"}),
+            new("ubicacion", "Nuestra dirección está en tu panel. Si necesitas mapa o referencias, avísame.", new[]{"ubicación","direccion","dirección","mapa"}),
+            new("recordatorio", "Podemos enviar recordatorios por correo. Indica la cita que quieres recordar.", new[]{"recordatorio","recordatorios","avisar","notificación"}),
+            new("saludo", "¡Hola! Soy tu asistente. Pregúntame por citas, servicios o pagos y te ayudo.", new[]{"hola","buenas","saludo","hey"}),
+            new("fallback", "No encontré coincidencia. Pregunta por citas, servicios, pagos o ubicación y te respondo.", new[]{"?"})
+        };
     }
 
     public Task<ChatResponse> ReplyAsync(ChatRequest request)
@@ -33,7 +38,7 @@ public class ChatProviderMock : IChatProvider
         var assistantMessage = new ChatMessage(
             Id: Guid.NewGuid().ToString(),
             Sender: "assistant",
-            Content: BuildMockReply(request.Message),
+            Content: BuildReply(request.Message),
             CreatedAt: DateTimeOffset.UtcNow
         );
 
@@ -44,15 +49,21 @@ public class ChatProviderMock : IChatProvider
         ));
     }
 
-    private static string BuildMockReply(string input)
+    private string BuildReply(string input)
     {
-        if (input.Contains("cita", StringComparison.OrdinalIgnoreCase))
-            return "Puedo ayudarte a gestionar citas. Sustituye ChatProviderMock por el proveedor real y persiste en Supabase.";
-        if (input.Contains("emplead", StringComparison.OrdinalIgnoreCase))
-            return "Los empleados se devolverán desde Supabase; este es un mock.";
-        if (input.Contains("servicio", StringComparison.OrdinalIgnoreCase))
-            return "Servicios vienen del catálogo Supabase; integra tu provider real aquí.";
+        var scored = _replies
+            .Select(r => new { r.Reply, Score = r.Keywords.Count(k => input.Contains(k, StringComparison.OrdinalIgnoreCase)) })
+            .OrderByDescending(x => x.Score)
+            .FirstOrDefault();
 
-        return $"Recibí tu mensaje: \"{input}\". Integra tu LLM en ChatProviderMock o crea otro proveedor.";
+        if (scored is not null && scored.Score > 0)
+            return scored.Reply;
+
+        return "No encontré coincidencia. Pregunta por citas, servicios, pagos o ubicación y te respondo.";
+    }
+
+    private record BotReply(string Intent, string Reply, IEnumerable<string> Keywords)
+    {
+        public List<string> Keywords { get; } = Keywords.ToList();
     }
 }

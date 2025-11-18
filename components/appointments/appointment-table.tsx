@@ -9,7 +9,6 @@ interface Appointment {
   date: string;
   time: string;
   service: string;
-  employee: string;
   status: 'pendiente' | 'confirmada' | 'cancelada';
 }
 
@@ -40,9 +39,6 @@ export function AppointmentTable({
                 Servicio
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                Empleado
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
                 Estado
               </th>
               <th className="px-6 py-4 text-right text-sm font-semibold text-foreground">
@@ -62,9 +58,6 @@ export function AppointmentTable({
                 <td className="px-6 py-4 text-sm text-foreground">{apt.date}</td>
                 <td className="px-6 py-4 text-sm text-foreground">{apt.time}</td>
                 <td className="px-6 py-4 text-sm text-foreground">{apt.service}</td>
-                <td className="px-6 py-4 text-sm text-muted-foreground">
-                  {apt.employee}
-                </td>
                 <td className="px-6 py-4 text-sm">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${

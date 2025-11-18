@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: chatbot-api
+    runtime: docker
+    dockerfilePath: ./backend/ChatBot.Api/Dockerfile
+    dockerContext: ./backend/ChatBot.Api
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+    healthCheckPath: /health

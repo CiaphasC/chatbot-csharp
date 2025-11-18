@@ -1,13 +1,13 @@
-﻿'use client';
+'use client';
 
 import { motion } from 'framer-motion';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { MetricCard } from '@/components/dashboard/metric-card';
 import { Users, Calendar, Clock, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
-import { mockAdminAppointments } from '@/lib/mocks';
 import { Button } from '@/components/ui/button';
-
+import { useEffect, useState } from 'react';
+import { api, type AppointmentDto, type ServiceDto } from '@/lib/api';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,6 +30,16 @@ const itemVariants = {
 };
 
 export default function AdminDashboard() {
+  const [appointments, setAppointments] = useState<AppointmentDto[]>([]);
+  const [services, setServices] = useState<ServiceDto[]>([]);
+
+  useEffect(() => {
+    api.listAppointments().then(setAppointments).catch(console.error);
+    api.listServices().then(setServices).catch(console.error);
+  }, []);
+
+  const serviceName = (id?: string) => services.find((s) => s.id === id)?.name ?? id;
+
   return (
     <DashboardLayout>
       <motion.div
@@ -51,100 +61,32 @@ export default function AdminDashboard() {
         >
           <MetricCard
             icon={Users}
-            label="Total Empleados"
-            value={12}
-            change="+2 esta semana"
-            changeType="positive"
+            label="Total Servicios"
+            value={services.length}
+            change=""
+            changeType="neutral"
           />
           <MetricCard
             icon={Users}
-            label="Total Clientes"
-            value={48}
-            change="+5 esta semana"
-            changeType="positive"
+            label="Total Citas"
+            value={appointments.length}
+            change=""
+            changeType="neutral"
           />
           <MetricCard
             icon={Calendar}
             label="Citas Hoy"
-            value={8}
-            change="3 confirmadas"
+            value={appointments.filter((a) => a.start_at?.slice(0, 10) === new Date().toISOString().slice(0, 10)).length}
+            change=""
             changeType="neutral"
           />
           <MetricCard
             icon={TrendingUp}
             label="Tasa Ocupación"
-            value="85%"
-            change="+5% vs semana pasada"
-            changeType="positive"
+            value="-"
+            change=""
+            changeType="neutral"
           />
-        </motion.div>
-
-        {/* Charts Section */}
-        <motion.div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-          variants={containerVariants}
-        >
-          {/* Chart 1 */}
-          <motion.div
-            className="backdrop-blur-xl bg-gradient-to-br from-card/80 via-card/40 to-card/20 border border-border/30 rounded-2xl p-6"
-            variants={itemVariants}
-          >
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-bold text-foreground">Citas por Servicio</h3>
-                <p className="text-sm text-muted-foreground">Distribución de citas según tipo</p>
-              </div>
-
-              <div className="w-full h-48 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl flex items-center justify-center border border-border/20">
-                <div className="text-center space-y-2">
-                  <div className="flex justify-center gap-2">
-                    {[40, 60, 50, 70, 55].map((height, i) => (
-                      <motion.div
-                        key={i}
-                        className="w-8 rounded-t bg-gradient-to-t from-primary to-accent"
-                        initial={{ height: 0 }}
-                        animate={{ height: `${height}%` }}
-                        transition={{ delay: i * 0.1, duration: 0.6 }}
-                        style={{ minHeight: '20px' }}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Chart placeholder</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Chart 2 */}
-          <motion.div
-            className="backdrop-blur-xl bg-gradient-to-br from-card/80 via-card/40 to-card/20 border border-border/30 rounded-2xl p-6"
-            variants={itemVariants}
-          >
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-bold text-foreground">Ocupación Semanal</h3>
-                <p className="text-sm text-muted-foreground">Porcentaje de ocupación</p>
-              </div>
-
-              <div className="w-full h-48 bg-gradient-to-br from-accent/10 to-primary/10 rounded-xl flex items-center justify-center border border-border/20">
-                <div className="text-center space-y-2">
-                  <div className="flex justify-center gap-2">
-                    {[45, 55, 50, 75, 70, 80, 60].map((height, i) => (
-                      <motion.div
-                        key={i}
-                        className="w-6 rounded-t bg-gradient-to-t from-accent to-primary"
-                        initial={{ height: 0 }}
-                        animate={{ height: `${height}%` }}
-                        transition={{ delay: i * 0.08, duration: 0.6 }}
-                        style={{ minHeight: '15px' }}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Chart placeholder</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </motion.div>
 
         {/* Recent Appointments */}
@@ -155,7 +97,7 @@ export default function AdminDashboard() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-foreground">Citas de Hoy</h3>
+                <h3 className="text-lg font-bold text-foreground">Citas recientes</h3>
                 <p className="text-sm text-muted-foreground">Próximas citas programadas</p>
               </div>
               <Link href="/dashboard/admin/appointments">
@@ -166,7 +108,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="space-y-2">
-              {mockAdminAppointments.slice(0, 3).map((apt, idx) => (
+              {appointments.slice(0, 3).map((apt, idx) => (
                 <motion.div
                   key={apt.id}
                   className="flex items-center justify-between p-4 bg-gradient-to-r from-card/50 to-card/20 hover:from-card/70 hover:to-card/40 rounded-xl border border-border/20 hover:border-primary/30 transition-all duration-300 group cursor-pointer"
@@ -181,7 +123,7 @@ export default function AdminDashboard() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
-                      {apt.clientName}
+                      {serviceName(apt.service_id)}
                     </motion.p>
                     <motion.p 
                       className="text-sm text-muted-foreground"
@@ -189,12 +131,12 @@ export default function AdminDashboard() {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.05 }}
                     >
-                      {apt.serviceName}
+                      {apt.client_name ?? apt.client_id}
                     </motion.p>
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-                      {apt.time}
+                      {apt.start_at?.slice(0,10)} {new Date(apt.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                     <motion.span
                       className={`text-xs px-3 py-1 rounded-full font-bold whitespace-nowrap transition-all ${
@@ -216,4 +158,3 @@ export default function AdminDashboard() {
     </DashboardLayout>
   );
 }
-

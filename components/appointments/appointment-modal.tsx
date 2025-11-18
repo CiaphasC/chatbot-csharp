@@ -59,13 +59,6 @@ export function AppointmentModal({
               <p className="text-foreground">{appointment.client}</p>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">
-                Empleado
-              </p>
-              <p className="text-foreground">{appointment.employee}</p>
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">

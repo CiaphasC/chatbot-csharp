@@ -1,12 +1,11 @@
 namespace ChatBot.Api.Domain.Models;
 
 /// <summary>
-/// Cita entre un cliente y un empleado para un servicio específico.
+/// Cita entre un cliente y un servicio.
 /// </summary>
 public record Appointment(
     Guid Id,
     Guid ClientId,
-    Guid EmployeeId,
     Guid ServiceId,
     DateOnly Date,
     TimeSpan Time,

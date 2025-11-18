@@ -285,12 +285,6 @@ export function SignupForm() {
                       Cliente
                     </div>
                   </SelectItem>
-                  <SelectItem value="empleado" className="text-foreground">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Empleado
-                    </div>
-                  </SelectItem>
                 </SelectContent>
               </Select>
             </motion.div>

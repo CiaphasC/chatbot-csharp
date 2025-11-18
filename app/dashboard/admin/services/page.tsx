@@ -2,42 +2,62 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Edit2, Trash2, Package, Clock, DollarSign } from 'lucide-react';
 import { ServiceForm } from '@/components/services/service-form';
-import { mockServices } from '@/lib/mocks';
-
+import { api, type ServiceDto } from '@/lib/api';
 
 export default function ServicesPage() {
-  const [services, setServices] = useState(mockServices);
+  const [services, setServices] = useState<ServiceDto[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editingService, setEditingService] = useState<any>(null);
+  const [editingService, setEditingService] = useState<ServiceDto | null>(null);
+
+  useEffect(() => {
+    api.listServices().then(setServices).catch(console.error);
+  }, []);
 
   const handleAddService = (data: any) => {
-    const newService = {
-      id: Math.max(...services.map((s) => s.id), 0) + 1,
-      ...data,
-      price: parseFloat(data.price) || 0,
-    };
-    setServices([...services, newService]);
-    setShowForm(false);
+    api
+      .createService({
+        name: data.name,
+        duration_minutes: Number(data.duration),
+        description: data.description,
+      })
+      .then((created) => {
+        setServices([...services, created]);
+        setShowForm(false);
+      })
+      .catch(console.error);
   };
 
   const handleEditService = (data: any) => {
-    setServices(
-      services.map((s) =>
-        s.id === editingService.id
-          ? { ...s, ...data, price: parseFloat(data.price) || 0 }
-          : s
-      )
-    );
-    setEditingService(null);
-    setShowForm(false);
+    if (!editingService) return;
+    api
+      .updateService(String(editingService.id), {
+        name: data.name,
+        duration_minutes: Number(data.duration),
+        description: data.description,
+      })
+      .then(() => {
+        setServices((prev) =>
+          prev.map((s) =>
+            s.id === editingService.id
+              ? { ...s, name: data.name, duration_minutes: Number(data.duration), description: data.description }
+              : s
+          )
+        );
+        setEditingService(null);
+        setShowForm(false);
+      })
+      .catch(console.error);
   };
 
-  const handleDeleteService = (id: number) => {
-    setServices(services.filter((s) => s.id !== id));
+  const handleDeleteService = (id: string) => {
+    api
+      .deleteService(id)
+      .then(() => setServices(services.filter((s) => s.id !== id)))
+      .catch(console.error);
   };
 
   const containerVariants = {
@@ -114,7 +134,12 @@ export default function ServicesPage() {
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               >
                 <ServiceForm
-                  service={editingService}
+                  service={editingService ? {
+                    name: editingService.name,
+                    duration: editingService.duration_minutes,
+                    description: editingService.description,
+                    status: 'activo'
+                  } : undefined}
                   onClose={() => {
                     setShowForm(false);
                     setEditingService(null);
@@ -162,14 +187,10 @@ export default function ServicesPage() {
                       )}
                     </div>
                     <motion.span
-                      className={`ml-2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                        service.status === 'activo'
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-gray-500/20 text-gray-400'
-                      }`}
+                      className="ml-2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-green-500/20 text-green-400"
                       whileHover={{ scale: 1.05 }}
                     >
-                      {service.status}
+                      activo
                     </motion.span>
                   </motion.div>
 
@@ -186,18 +207,20 @@ export default function ServicesPage() {
                     >
                       <Clock className="w-4 h-4 text-primary/60" />
                       <span className="text-sm font-medium text-foreground">
-                        {service.duration} min
+                        {service.duration_minutes} min
                       </span>
                     </motion.div>
-                    <motion.div 
-                      className="flex items-center gap-2"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <DollarSign className="w-4 h-4 text-accent/60" />
-                      <span className="text-lg font-bold text-accent">
-                        ${service.price.toFixed(2)}
-                      </span>
-                    </motion.div>
+                    {service['price'] && (
+                      <motion.div 
+                        className="flex items-center gap-2"
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        <DollarSign className="w-4 h-4 text-accent/60" />
+                        <span className="text-lg font-bold text-accent">
+                          ${Number(service['price']).toFixed(2)}
+                        </span>
+                      </motion.div>
+                    )}
                   </motion.div>
 
                   {/* Actions */}
@@ -222,7 +245,7 @@ export default function ServicesPage() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => handleDeleteService(service.id)}
+                      onClick={() => handleDeleteService(String(service.id))}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-destructive/20 text-destructive hover:bg-destructive/30 transition-colors font-medium"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -238,4 +261,3 @@ export default function ServicesPage() {
     </DashboardLayout>
   );
 }
-

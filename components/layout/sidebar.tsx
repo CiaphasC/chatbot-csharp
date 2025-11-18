@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 
 const sidebarItems = [
   { label: 'Resumen', href: '/dashboard/admin', icon: LayoutDashboard },
-  { label: 'Empleados', href: '/dashboard/admin/employees', icon: Users },
   { label: 'Clientes', href: '/dashboard/admin/clients', icon: Users },
   { label: 'Citas', href: '/dashboard/admin/appointments', icon: Calendar },
   { label: 'Servicios', href: '/dashboard/admin/services', icon: Package },

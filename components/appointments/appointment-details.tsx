@@ -8,7 +8,6 @@ interface Appointment {
   id: number;
   clientName: string;
   serviceName: string;
-  employeeName: string;
   date: string;
   time: string;
   duration: string;
@@ -98,15 +97,6 @@ export function AppointmentDetails({
             <div className="flex-1 space-y-1">
               <p className="text-xs text-muted-foreground">Cliente</p>
               <p className="font-medium text-foreground">{appointment.clientName}</p>
-            </div>
-          </div>
-
-          {/* Employee */}
-          <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg backdrop-blur-sm border border-border/20">
-            <User className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-            <div className="flex-1 space-y-1">
-              <p className="text-xs text-muted-foreground">Empleado</p>
-              <p className="font-medium text-foreground">{appointment.employeeName}</p>
             </div>
           </div>
 

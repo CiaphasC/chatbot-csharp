@@ -1,13 +1,13 @@
 # ChatBot API (C# Minimal API, .NET 9)
 
 API mínima en .NET 9 lista para Render (backend) y Vercel (frontend). Incluye:
-- Endpoints de empleados, clientes, servicios y citas con validación de solape (no reserva si la franja está ocupada para ese empleado).
+- Endpoints de clientes, servicios y citas con validación de solape (no reserva si la franja está ocupada).
 - Endpoint de chat con proveedor mock, listo para cambiar a un LLM real (OpenAI/Azure, etc.).
 - Almacén en memoria; reemplace por repositorios Supabase/Postgres cuando conectes la base de datos.
 
 ## Estructura
 - `Program.cs`: registro de servicios y mapeo de endpoints.
-- `Endpoints/ApiEndpoints.cs`: rutas `/api/*` (empleados, clientes, servicios, citas, chat).
+- `Endpoints/ApiEndpoints.cs`: rutas `/api/*` (clientes, servicios, citas, chat).
 - `Infrastructure/*`: store en memoria, servicio de citas (verifica solapes), proveedor de chat mock.
 - `Domain/Models/*`: modelos base.
 - `Dockerfile`: imagen .NET 9, puerto 8080.
@@ -34,6 +34,6 @@ dotnet run
 - Sustituye las llamadas mock del frontend Next por los endpoints:
   - `POST /api/appointments` (crea cita; si está ocupada, devuelve 400 con mensaje).
   - `GET /api/appointments?date=YYYY-MM-DD` (lista citas de un día).
-  - `GET/POST /api/employees`, `/api/clients`, `/api/services`.
+  - Endpoints principales: `/api/clients`, `/api/services`, `/api/appointments`, `/api/chat`.
   - `POST /api/chat` (chat mock; cambia el proveedor para LLM real).
 - Reemplaza el store en memoria (`AppDataStore`) por repos que apunten a Supabase/Postgres y conserva la lógica de solape en `AppointmentService`.
