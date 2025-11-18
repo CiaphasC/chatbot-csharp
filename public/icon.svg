@@ -1,0 +1,11 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' role='img' aria-label='App Icon'>
+  <defs>
+    <linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'>
+      <stop offset='0%' stop-color='#7c3aed'/>
+      <stop offset='100%' stop-color='#22d3ee'/>
+    </linearGradient>
+  </defs>
+  <rect x='2' y='2' width='60' height='60' rx='12' fill='url(#g)'/>
+  <path fill='white' fill-opacity='0.9' d='M16 20h12c6 0 10 4 10 10s-4 10-10 10H20v6h-4V20zm12 14c3.3 0 6-2.2 6-4 0-1.8-2.7-4-6-4H20v8h8z'/>
+  <path fill='white' fill-opacity='0.9' d='M38 20h10c4.4 0 8 3.6 8 8v16h-4V28c0-2.2-1.8-4-4-4H42v20h-4V20z'/>
+</svg>
