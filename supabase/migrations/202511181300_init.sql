@@ -42,7 +42,7 @@ create table public.appointments (
   client_id uuid not null references public.profiles(id) on delete cascade,
   service_id uuid not null references public.services(id) on delete restrict,
   start_at timestamptz not null,
-  end_at timestamptz generated always as (start_at + make_interval(mins => (select duration_minutes from public.services s where s.id = service_id))) stored,
+  end_at timestamptz not null,
   status text not null default 'pending',
   notes text,
   created_at timestamptz not null default now()
@@ -76,7 +76,10 @@ alter table public.chat_messages enable row level security;
 
 -- Políticas: perfiles
 create policy "Profiles: owners can read/update self" on public.profiles
-  for select using (auth.uid() = id)
+  for select using (auth.uid() = id);
+
+create policy "Profiles: users can update self" on public.profiles
+  for update using (auth.uid() = id)
   with check (auth.uid() = id);
 
 create policy "Profiles: admins can manage all" on public.profiles
